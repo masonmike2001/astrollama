@@ -33,7 +33,7 @@ It allows you to prompt AI from selected text, generate structured content, and 
 1. Download the latest release from GitHub
 2. Extract the zip file
 3. Copy the folder into:
-   .obsidian/plugins/astrolama/
+   .obsidian/plugins/astrollama/
 4. Enable the plugin in Obsidian:
    Settings → Community Plugins → Enable AstroLlama
 5. Restart Obsidian (if needed)
@@ -41,7 +41,7 @@ It allows you to prompt AI from selected text, generate structured content, and 
 ## 🛠️ Development Setup
 
 1. Clone the repository:
-   git clone https://github.com/yourname/astrolama.git
+   git clone https://github.com/masonmike2001/astrollama.git
 
 2. Install dependencies:
    npm install
