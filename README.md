@@ -50,7 +50,7 @@ It allows you to prompt AI from selected text, generate structured content, and 
    npm run build
 
 4. Copy build output to your vault:
-   .obsidian/plugins/astrolama/
+   .obsidian/plugins/astrollama/
 
 <!-- ## 📥 Recommended Install
 
