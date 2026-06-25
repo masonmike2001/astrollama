@@ -21,9 +21,19 @@ export function registerMakeWiki(
                     .split(':')[0]
                     .trim();
 
-                    editor.replaceSelection(selected + "\n********\n See more: " + "[[Wiki_"+  "" + cleaned + "" + ".md]]");
+                const folder = "Astrollama";
+
+				if (!await plugin.app.vault.adapter.exists(folder)) {
+					await plugin.app.vault.createFolder(folder);
+				}
+				if (!await plugin.app.vault.adapter.exists(`${folder}/Wiki`)) {
+					await plugin.app.vault.createFolder(`${folder}/Wiki`);
+				}
+
+
+                    // editor.replaceSelection(selected + "\n********\n See more: " + "[[Wiki_"+  "" + cleaned + "" + ".md]]");
                     await plugin.app.vault.create(
-                        `Wiki_${cleaned}.md`,
+                        `Astrollama/Wiki/${cleaned}.md`,
                         answer
                     );
 

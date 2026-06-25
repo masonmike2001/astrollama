@@ -14,9 +14,9 @@ import {
 } from './settings';
 
 import { registerAskVaultCommand } from "./commands/askVault";
-
 import { registerMakeWiki } from "./commands/makeWiki";
 import { registerPromptSelected } from "./commands/promptSelected";
+import { askOllama } from './commands/askOllama';
 
 
 // Remember to rename these classes and interfaces!
@@ -31,6 +31,116 @@ export default class Astrollama extends Plugin {
 		registerAskVaultCommand(this);
         registerMakeWiki(this);
 		registerPromptSelected(this);
+
+
+		this.addCommand({
+            id: "ask-vault",
+            name: "Ask Vault (keyword + Ollama)",
+
+            editorCallback: async (editor) => {
+
+                // 1. get question (temporary hardcoded)
+                const question = editor.getSelection();
+
+                // 2. retrieve notes via keyword search
+                const notes = await this.keywordSearch(question);
+
+                // 3. build context
+                const context = notes
+                    .map(n => `FILE: ${n.file.path}\n${n.content}`)
+                    .join("\n\n---\n\n");
+
+                // 4. build RAG prompt
+                const prompt = `
+You are an assistant answering questions using Obsidian notes.
+
+Use ONLY the context below.
+
+CONTEXT:
+${context}
+
+QUESTION:
+${question}
+
+Answer clearly and concisely.
+                `;
+
+                // 5. call Ollama
+				const notice = new Notice("Sending prompt to Ollama...", 0);
+
+			try {
+				notice.setMessage("Generating response...");
+
+				const answer = await askOllama(prompt);
+
+				notice.setMessage("Done!");
+
+				setTimeout(() => notice.hide(), 1000);
+
+			    // 6. save result as note
+                const clean = question
+                    .replace(/^#+\s*/, '')
+                    .replace(/[*_`]/g, '')
+                    .trim()
+					.toLowerCase();
+
+				const folder = "Astrollama";
+
+				if (!await this.app.vault.adapter.exists(folder)) {
+					await this.app.vault.createFolder(folder);
+				}
+				if (!await this.app.vault.adapter.exists("Ask")) {
+					await this.app.vault.createFolder(`${folder}/Ask`);
+				}
+
+                await this.app.vault.create(
+                    `Astrollama/Ask/${clean}.md`,
+                    answer
+                );
+
+                new Notice("AskVault complete");
+
+			} catch (e) {
+				notice.setMessage("Error calling Ollama");
+			}
+
+
+            }
+        });
+    }
+async keywordSearch(query: string) {
+        const files = this.app.vault.getMarkdownFiles();
+
+        const results: any[] = [];
+
+        for (const file of files) {
+            const content = await this.app.vault.read(file);
+
+            const score = this.score(content, query);
+
+            if (score > 0) {
+                results.push({ file, content, score });
+            }
+        }
+
+        return results
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5);
+    }
+
+    score(content: string, query: string) {
+        const words = query.toLowerCase().split(/\s+/);
+        const text = content.toLowerCase();
+
+        let score = 0;
+
+        for (const w of words) {
+            score += (text.match(new RegExp(w, "g")) || []).length;
+        }
+
+        return score;
+    
+
 
 
 		
@@ -65,54 +175,6 @@ export default class Astrollama extends Plugin {
 // 			) => {
 // 				editor.replaceSelection('Sample editor command');
 // 			},
-// 		});
-// 		this.addCommand({
-// 			id: "hello",
-// 			name: "Say Hello",
-// 			callback: () => {
-// 				console.log("hello");
-// 			}
-// 		});
-// 		this.addCommand({
-// 			id: "count-words",
-// 			name: "Count Words",
-// 			editorCallback: (editor) => {
-// 				const text = editor.getSelection().trim();
-// 				const words = text === ""
-//     			? 0
-//     			: text.split(/\s+/).length;
-// 				new Notice(`Word Count: ${words}`);
-// 			}
-// 		});
-// 		this.addCommand({
-// 			id: "insert-timestamp",
-// 			name: "Insert Timestamp",
-// 			editorCallback: (editor) => {
-// 				const current = editor.getValue();
-// 				editor.setValue(current + " " + new Date());
-// 			}
-// 		});
-// 		this.addCommand({
-// 			id: "create-daily-reflection",
-// 			name: "Create Daily Reflection",
-// 			callback: async () => {
-
-// 				const content = `# Reflection
-
-// ## Wins
-
-// ## Challenges
-
-// ## Tomorrow
-// `;
-
-// 				await this.app.vault.create(
-// 					"Reflection.md",
-// 					content
-// 				);
-
-// 				new Notice("Reflection note created!");
-// 			}
 // 		});
 
 
