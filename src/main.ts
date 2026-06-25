@@ -13,7 +13,6 @@ import {
 	SampleSettingTab,
 } from './settings';
 
-import { registerAskVaultCommand } from "./commands/askVault";
 import { registerMakeWiki } from "./commands/makeWiki";
 import { registerPromptSelected } from "./commands/promptSelected";
 import { askOllama } from './commands/askOllama';
@@ -23,12 +22,11 @@ import { askOllama } from './commands/askOllama';
 
 // AFTER UPDATE RUN npm run dev!!
 
-export default class Astrollama extends Plugin {
+export default class AstroLlama extends Plugin {
 	settings!: MyPluginSettings;
 
 	async onload() {
 		await this.loadSettings();
-		registerAskVaultCommand(this);
         registerMakeWiki(this);
 		registerPromptSelected(this);
 
@@ -52,18 +50,18 @@ export default class Astrollama extends Plugin {
 
                 // 4. build RAG prompt
                 const prompt = `
-You are an assistant answering questions using Obsidian notes.
+				You are an assistant answering questions using Obsidian notes.
 
-Use ONLY the context below.
+				Use ONLY the context below.
 
-CONTEXT:
-${context}
+				CONTEXT:
+				${context}
 
-QUESTION:
-${question}
+				QUESTION:
+				${question}
 
-Answer clearly and concisely.
-                `;
+				Answer clearly and concisely.
+								`;
 
                 // 5. call Ollama
 				const notice = new Notice("Sending prompt to Ollama...", 0);
@@ -82,9 +80,10 @@ Answer clearly and concisely.
                     .replace(/^#+\s*/, '')
                     .replace(/[*_`]/g, '')
                     .trim()
-					.toLowerCase();
+					.toLowerCase()
+					;
 
-				const folder = "Astrollama";
+				const folder = "AstroLlama";
 
 				if (!await this.app.vault.adapter.exists(folder)) {
 					await this.app.vault.createFolder(folder);
@@ -94,7 +93,7 @@ Answer clearly and concisely.
 				}
 
                 await this.app.vault.create(
-                    `Astrollama/Ask/${clean}.md`,
+                    `${folder}/Ask/${clean}.md`,
                     answer
                 );
 

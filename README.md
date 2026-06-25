@@ -2,64 +2,67 @@
 
 AstroLlama is an Obsidian plugin that integrates local AI models via Ollama, bringing fast, private, and flexible AI workflows directly into your notes.
 
-It allows you to prompt AI from selected text, generate structured content, and automatically create linked wiki-style notes inside your vault.
+It allows you to prompt AI from selected text, generate structured content, and automatically create linked wiki-style notes inside your vault. Fully local workflow (no external API required).
 
-## ✨ Features
-- Run AI prompts directly inside Obsidian using Ollama
-- Generate structured wiki-style articles from notes or prompts
-- Automatically create new notes from AI output
-- Insert Obsidian internal links to generated content
-- Use selection-based editing for rewriting or expanding text
-- Fully local workflow (no external API required)
 
-## 🧠 Use Cases
-- Turn rough notes into structured wiki pages
-- Expand or rewrite selected text with AI
-- Generate documentation from ideas or snippets
-- Build a personal knowledge base powered by local LLMs
+## ✨ Commands
+- **PromptSelected**: Rewrite or expand selected text using Ollama
+- **CreateWiki**: Converts a note or prompt into a structured wiki-style markdown file
+- **AskVault**: Engages your vault using keyword-based retrieval and generates an AI answer using relevant notes as context
+
+
+## 🧠 Architecture
+- Obsidian Plugin (TypeScript)
+- Local LLM inference via Ollama
+- Keyword-based retrieval (AskVault)
+- File-based knowledge generation (Wiki system)
+- Fully offline AI workflow
+
+## 🖼️ Screenshots
+![alt text](image.png)
+
 
 ## ⚙️ Requirements
 - Obsidian
 - Ollama installed and running locally
 - A compatible model installed (e.g. Llama, Mistral, etc.)
 
-## 🚀 How It Works
 
-AstroLlama connects Obsidian’s editor API with Ollama. You can:
+## 📦 Installation (Recommended)
 
-- Select text or write a prompt inside a note
-- Trigger the plugin command
-- Receive AI-generated output directly in your vault
-- Optionally generate a structured wiki page with automatic linking
+1. Download the latest release from GitHub
+2. Extract the zip file
+3. Copy the folder into:
+   .obsidian/plugins/astrolama/
+4. Enable the plugin in Obsidian:
+   Settings → Community Plugins → Enable AstroLlama
+5. Restart Obsidian (if needed)
 
-## 📦 Installation
-Manual Installation:
-- Download or clone this repository
+## 🛠️ Development Setup
 
-- Build the plugin:
+1. Clone the repository:
+   git clone https://github.com/yourname/astrolama.git
 
-	1. npm install
-	2. npm run build
+2. Install dependencies:
+   npm install
 
-3. Copy the following files into your vault:
-.obsidian/plugins/astrollama/
-4. Enable the plugin in Obsidian settings
+3. Build the plugin:
+   npm run build
 
+4. Copy build output to your vault:
+   .obsidian/plugins/astrolama/
 
+<!-- ## 📥 Recommended Install
 
-## 🧩 Example Workflow
-- Select rough notes inside Obsidian
-- Run “Generate Wiki Page”
-- AstroLlama creates a structured markdown article
-- A new note is created in your vault
-- A link is inserted back into your original note
+Download the latest release:
+https://github.com/masonmike2001/astrollama/releases -->
 
 ## 🛠️ Built With
-- Obsidian Sample Plugin (starter template)
-- Ollama local LLM runtime
-- TypeScript
-## 📌 Notes
+- Obsidian Plugin API (TypeScript)
+- Ollama local inference runtime
+- Custom retrieval and prompt orchestration system
 
+## 📌 Notes
 This plugin is designed for local-first AI workflows. All processing happens through your local Ollama instance—no data is sent to external APIs.
 
 ## 📄 License
