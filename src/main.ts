@@ -18,11 +18,10 @@ import { registerPromptSelected } from "./commands/promptSelected";
 import { askOllama } from './commands/askOllama';
 
 
-// Remember to rename these classes and interfaces!
-
 // AFTER UPDATE RUN npm run dev!!
 
 export default class AstroLlama extends Plugin {
+	
 	settings!: MyPluginSettings;
 
 	async onload() {
@@ -30,6 +29,10 @@ export default class AstroLlama extends Plugin {
         registerMakeWiki(this);
 		registerPromptSelected(this);
 
+
+		this.addSettingTab(new SampleSettingTab(this.app, this));
+
+		
 
 		this.addCommand({
             id: "ask-vault",
@@ -73,7 +76,7 @@ export default class AstroLlama extends Plugin {
 
 				notice.setMessage("Done!");
 
-				setTimeout(() => notice.hide(), 1000);
+				window.setTimeout(() => notice.hide(), 1000);
 
 			    // 6. save result as note
                 const clean = question
@@ -107,37 +110,64 @@ export default class AstroLlama extends Plugin {
             }
         });
     }
-async keywordSearch(query: string) {
-        const files = this.app.vault.getMarkdownFiles();
 
-        const results: any[] = [];
 
-        for (const file of files) {
-            const content = await this.app.vault.read(file);
 
-            const score = this.score(content, query);
 
-            if (score > 0) {
-                results.push({ file, content, score });
-            }
-        }
 
-        return results
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 5);
+score(content: string, query: string) {
+    const words = query
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(Boolean);
+
+    const text = content.toLowerCase();
+
+    let score = 0;
+
+    for (const w of words) {
+        score += (text.match(new RegExp(w, "g")) || []).length;
     }
 
-    score(content: string, query: string) {
-        const words = query.toLowerCase().split(/\s+/);
-        const text = content.toLowerCase();
+    return score;
+}
 
-        let score = 0;
+	async getContext(query: string) {
+    let files = this.app.vault.getMarkdownFiles();
 
-        for (const w of words) {
-            score += (text.match(new RegExp(w, "g")) || []).length;
+    const folder = this.settings.contextFolder;
+
+    if (folder) {
+        files = files.filter(file =>
+            file.path.startsWith(folder + "/")
+        );
+    }
+
+    const results = [];
+
+    for (const file of files) {
+        const content = await this.app.vault.read(file);
+
+        const score = this.score(content, query);
+
+        if (score > 0) {
+            results.push({
+                file,
+                content,
+                score
+            });
         }
+    }
 
-        return score;
+    return results
+        .sort((a,b) => b.score - a.score)
+        .slice(0,5);
+}
+
+
+async keywordSearch(query:string) {
+    return this.getContext(query);
+}
     
 
 
@@ -200,7 +230,7 @@ async keywordSearch(query: string) {
 // 		});
 
 // 		// This adds a settings tab so the user can configure various aspects of the plugin
-// 		this.addSettingTab(new SampleSettingTab(this.app, this));
+
 
 // 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 // 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -217,7 +247,7 @@ async keywordSearch(query: string) {
 // 		console.log("loaded");
 
 
-	}
+	
 
 	onunload() {}
 

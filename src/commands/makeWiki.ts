@@ -1,18 +1,43 @@
 import { Plugin, Notice } from "obsidian";
 import {askOllama} from "../commands/askOllama"
+import AstroLlama from "../main";
+
+
 
 export function registerMakeWiki(
-    plugin: Plugin
+    plugin: AstroLlama
 ) {
     plugin.addCommand({
                 id: 'create-wiki',
                 name: 'Create Wiki',
                 editorCallback: async (editor) => {
                     // wiki template either default or custom fields user will enter in settings
-                    const selected = editor.getSelection();
+const selected = editor.getSelection();
+
+const notes = await plugin.getContext(selected);
+
+const context = notes
+    .map(n => `FILE: ${n.file.path}\n${n.content}`)
+    .join("\n\n---\n\n");
+
                     const template = "Summary, History, Uses"
                     new Notice("Processing wiki...");
-                    const answer = await askOllama("You will create a structured and well formatted wiki article page for an Obsidian note following Obsidian formatting guidelines, including headers starting with # symbols and keeping the title of the entity as the first line. Ensure it follows only this standard layout: " + template +". Use these notes to create the wiki article: " + selected);
+                    const answer = await askOllama(
+`
+You will create a structured and well formatted wiki article page for an Obsidian note.
+
+Follow this layout:
+${template}
+
+Use ONLY the context below.
+
+CONTEXT:
+${context}
+
+SOURCE NOTE:
+${selected}
+`
+);
                     const firstLine = answer.split('\n')[0];
 
                     const cleaned = firstLine

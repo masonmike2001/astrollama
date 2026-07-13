@@ -3,10 +3,12 @@ import MyPlugin from './main';
 
 export interface MyPluginSettings {
 	mySetting: string;
+	contextFolder: string;
 }
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default',
+	contextFolder: ""
 };
 
 export class SampleSettingTab extends PluginSettingTab {
@@ -22,17 +24,33 @@ export class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc("It's a secret")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your secret')
-					.setValue(this.plugin.settings.mySetting)
-					.onChange(async (value) => {
-						this.plugin.settings.mySetting = value;
-						await this.plugin.saveSettings();
-					}),
-			);
-	}
+const folders = new Set<string>();
+
+this.app.vault.getAllLoadedFiles().forEach(file => {
+    if ("children" in file) {
+        folders.add(file.path);
+    }
+});
+
+new Setting(containerEl)
+    .setName("Context folder")
+    .addDropdown(drop => {
+        drop.addOption("", "Entire Vault");
+
+        [...folders]
+            .sort()
+            .forEach(folder => {
+                drop.addOption(folder, folder);
+            });
+
+        drop
+            .setValue(this.plugin.settings.contextFolder)
+            .onChange(async value => {
+                this.plugin.settings.contextFolder = value;
+                await this.plugin.saveSettings();
+            });
+    });
+	
+	
+}
 }
