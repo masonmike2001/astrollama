@@ -20,7 +20,7 @@ import { askOllama } from './commands/askOllama';
 
 // AFTER UPDATE RUN npm run dev!!
 
-export default class AstroLlama extends Plugin {
+export default class Astrollama extends Plugin {
 	
 	settings!: MyPluginSettings;
 
@@ -36,20 +36,25 @@ export default class AstroLlama extends Plugin {
 
 		this.addCommand({
             id: "ask-vault",
-            name: "Ask Vault (keyword + Ollama)",
+            name: "Ask Vault on Selection and Create Note",
 
             editorCallback: async (editor) => {
-
-                // 1. get question (temporary hardcoded)
+			const notice = new Notice(
+    "🔎 Searching context...",
+    0
+);
                 const question = editor.getSelection();
 
                 // 2. retrieve notes via keyword search
                 const notes = await this.keywordSearch(question);
-
+				notice.setMessage(
+					`📚 Found ${notes.length} notes`
+				);
                 // 3. build context
                 const context = notes
                     .map(n => `FILE: ${n.file.path}\n${n.content}`)
                     .join("\n\n---\n\n");
+
 
                 // 4. build RAG prompt
                 const prompt = `
@@ -63,19 +68,32 @@ export default class AstroLlama extends Plugin {
 				QUESTION:
 				${question}
 
-				Answer clearly and concisely.
 								`;
-
+				notice.setMessage(
+					`🦙 Sending to ${this.settings.ollamaModel}`
+				);
                 // 5. call Ollama
-				const notice = new Notice("Sending prompt to Ollama...", 0);
+
 
 			try {
-				notice.setMessage("Generating response...");
 
-				const answer = await askOllama(prompt);
 
-				notice.setMessage("Done!");
+				const answer = await Promise.race([
+    askOllama(
+        prompt,
+        this.settings.ollamaModel
+    ),
 
+    new Promise<string>((_, reject) =>
+        setTimeout(
+            () => reject(new Error("Ollama timeout")),
+            120000
+        )
+    )
+]);
+
+
+			notice.setMessage("✅ Ollama finished generating");
 				window.setTimeout(() => notice.hide(), 1000);
 
 			    // 6. save result as note
@@ -96,14 +114,15 @@ export default class AstroLlama extends Plugin {
 				}
 
                 await this.app.vault.create(
-                    `${folder}/Ask/${clean}.md`,
+                    `${folder}/Ask/${clean}-${Date.now()}.md`,
                     answer
                 );
 
                 new Notice("AskVault complete");
 
 			} catch (e) {
-				notice.setMessage("Error calling Ollama");
+				    console.error(e);
+    				notice.setMessage("❌ Failed");
 			}
 
 
@@ -126,7 +145,14 @@ score(content: string, query: string) {
     let score = 0;
 
     for (const w of words) {
-        score += (text.match(new RegExp(w, "g")) || []).length;
+        const safe = w.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+);
+
+score += (
+    text.match(new RegExp(safe, "g")) || []
+).length;
     }
 
     return score;

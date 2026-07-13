@@ -37,14 +37,20 @@ ${context}
 SOURCE NOTE:
 ${selected}
 `
-);
-                    const firstLine = answer.split('\n')[0];
+//ADD THE MODEL this.settings.ollamaModel
+, plugin.settings.ollamaModel);
 
-                    const cleaned = firstLine
-                    .replace(/^#+\s*/, '')
-                    .replace(/[*_`]/g, '')
-                    .split(':')[0]
-                    .trim();
+const firstLine = answer.split("\n")[0];
+
+if (!firstLine) {
+    throw new Error("Ollama returned an empty wiki title");
+}
+
+const cleaned = firstLine
+    .replace(/^#+\s*/, '')
+    .replace(/[*_`]/g, '')
+    .split(':')[0]
+    ?.trim() ?? "Untitled";
 
                 const folder = "AstroLlama";
 
