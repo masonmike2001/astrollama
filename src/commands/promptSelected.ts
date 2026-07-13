@@ -9,8 +9,8 @@ export function registerPromptSelected(
     plugin: AstroLlama
 ) {
     plugin.addCommand({
-        id: 'prompt-selected',
-        name: 'Prompt Selected',
+        id: 'improve-selection',
+        name: 'Improve Selection',
 
         editorCallback: async (editor) => {
 			const notice = new Notice("🔎 Searching context...", 0);

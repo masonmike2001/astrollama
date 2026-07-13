@@ -35,8 +35,8 @@ export default class Astrollama extends Plugin {
 		
 
 		this.addCommand({
-            id: "ask-vault",
-            name: "Ask Vault on Selection and Create Note",
+            id: "ask-selection",
+            name: "Ask Selection (Create Note)",
 
             editorCallback: async (editor) => {
 			const notice = new Notice(
@@ -58,17 +58,27 @@ export default class Astrollama extends Plugin {
 
                 // 4. build RAG prompt
                 const prompt = `
-				You are an assistant answering questions using Obsidian notes.
+You answer questions using a personal Obsidian vault.
 
-				Use ONLY the context below.
+IMPORTANT RULES:
+- Answer the QUESTION exactly.
+- Use the VAULT CONTEXT as your primary source.
+- Do not answer a different question mentioned in the context.
+- If the context does not contain enough information, say so.
+- Keep the answer focused.
 
-				CONTEXT:
-				${context}
+QUESTION:
 
-				QUESTION:
-				${question}
+${question}
 
-								`;
+
+VAULT CONTEXT:
+
+${context}
+
+
+Answer:
+`;
 				notice.setMessage(
 					`🦙 Sending to ${this.settings.ollamaModel}`
 				);
@@ -196,7 +206,17 @@ async keywordSearch(query:string) {
 }
     
 
+async ensureFolder(path: string) {
 
+    if (
+        !await this.app.vault.adapter.exists(path)
+    ) {
+
+        await this.app.vault.createFolder(path);
+
+    }
+
+}
 
 		
 

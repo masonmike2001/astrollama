@@ -6,12 +6,35 @@ export interface MyPluginSettings {
     mySetting: string;
     contextFolder: string;
     ollamaModel: string;
+	wikiTemplate: string;
 }
 
 export const DEFAULT_SETTINGS: MyPluginSettings = {
     mySetting: "default",
     contextFolder: "",
-    ollamaModel: "llama3.2"
+    ollamaModel: "llama3.2",
+wikiTemplate:
+`# {{Title}}
+
+## Overview
+
+## Background
+
+## Key Concepts
+
+## Structure / Components
+
+## How It Works
+
+## Applications / Uses
+
+## Advantages
+
+## Limitations / Criticism
+
+## Related Topics
+
+## References`
 };
 
 async function getOllamaModels(): Promise<string[]> {
@@ -110,5 +133,26 @@ display(): void {
                 await plugin.saveSettings();
             });
         });
+
+		new Setting(containerEl)
+.setName("Wiki Template")
+.setDesc("Markdown sections used when creating wiki pages.")
+.addTextArea(text => {
+
+    text
+    .setValue(
+        this.plugin.settings.wikiTemplate
+    )
+
+    .onChange(async value => {
+
+        this.plugin.settings.wikiTemplate =
+            value;
+
+        await this.plugin.saveSettings();
+
+    });
+
+});
 }
 }
